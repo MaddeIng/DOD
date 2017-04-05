@@ -19,9 +19,10 @@ namespace DungeonsOfDoom
 
         public virtual int Fight(Creature creatureOpponent)
         {
-            creatureOpponent.Health -= this.Attack;
+            int power = RandomUtils.Randomizer(0, this.Attack + 1);
+            creatureOpponent.Health -= power;
 
-            return this.Attack;
+            return power;
         }
     }
 }

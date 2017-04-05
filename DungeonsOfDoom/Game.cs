@@ -46,7 +46,7 @@ namespace DungeonsOfDoom
                 Console.BackgroundColor = ConsoleColor.DarkRed;
                 Console.Beep();
 
-                BattleMonster(room);            
+                BattleMonster(room);
             }
         }
 
@@ -54,28 +54,32 @@ namespace DungeonsOfDoom
         {
             do
             {
-            int damage = room.Monster.Fight(player);
+                int damage = room.Monster.Fight(player);
 
-            if (room.Monster.Health <= 0)
-            {
-                Console.WriteLine($"{room.Monster.Name} died out of fear!");
-                room.Monster.Health = 0;
-                //room.Monster = null;
-                Thread.Sleep(1000);
-            }
-            else
-            {
-                Console.WriteLine($"You took {damage} damage");
-                Thread.Sleep(1000);
-            }
+                if (room.Monster.Health <= 0)
+                {
+                    Console.WriteLine($"{room.Monster.Name} died out of fear!");
+                    room.Monster.Health = 0;
+                    //room.Monster = null;
+                    Thread.Sleep(1000);
+                }
+                else
+                {
+                    Console.WriteLine($"You took {damage} damage");
+                    Thread.Sleep(1000);
+                    if (player.Health <= 0)
+                    {
+                        GameOver();
+                    }
+                }
 
-            if (player.Health > 0 && room.Monster.Health != 0)
-            {
-                int playerDamage = player.Fight(room.Monster);
-                Console.WriteLine($"You gave {playerDamage} damage");
-                Thread.Sleep(1000);
-            }
-            } while (room.Monster.Health != 0) ;
+                if (player.Health > 0 && room.Monster.Health != 0)
+                {
+                    int playerDamage = player.Fight(room.Monster);
+                    Console.WriteLine($"You gave {playerDamage} damage");
+                    Thread.Sleep(1000);
+                }
+            } while (room.Monster.Health != 0);
 
             room.Monster = null;
         }
@@ -193,11 +197,17 @@ namespace DungeonsOfDoom
                     if (player.X != x || player.Y != y)
                     {
                         // 10% av fallen lägger vi till ett monster i rummet
-                        if (random.Next(0, 100) < 10)
-                            world[x, y].Monster = new Ogre("Ogre", "O", 30, 3);
-
-                        if (random.Next(0, 100) < 10)
-                            world[x, y].Monster = new Orc("Orc", "0", 12, 3);
+                        if (RandomUtils.Percentage(10))
+                        {
+                            if (RandomUtils.Randomizer(1, 3) == 1)
+                            {
+                                world[x, y].Monster = new Ogre("Ogre", "O", 30, 3);
+                            }
+                            else
+                            {
+                                world[x, y].Monster = new Orc("Orc", "0", 12, 3);
+                            }
+                        }
 
                         if (random.Next(0, 100) < 10)
                             world[x, y].Item = new Weapon("Sword", "S", 2, 3);
