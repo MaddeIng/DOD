@@ -14,5 +14,14 @@ namespace DungeonsOfDoom
         {
             ChangeAttackStats = changeAttackStats;
         }
+
+        public override string PickUpItem(Player player, Room room)
+        {
+            player.Backpack.Add(room.Item);
+            player.Attack += 5;
+            string message = $"{room.Item.Name} added. Attack power increased to: {player.Attack}";
+            room.Item = null;
+            return message;
+        }
     }
 }

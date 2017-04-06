@@ -15,12 +15,16 @@ namespace DungeonsOfDoom
             ChangeHealth = changeHealth;
         }
 
-        public virtual int pickUpItem(Food storeItem)
+        public override string PickUpItem(Player player, Room room)
         {
-            int power = RandomUtils.Randomizer(3, this.ChangeHealth + 1);
-            storeItem.ChangeHealth += power;
+            player.Backpack.Add(room.Item);
+            player.Health += RandomUtils.Randomizer(-2, 6);
+            string message = $"{room.Item.Name} added. Health increased to: {player.Health}";
+            room.Item = null;
+            return message;
 
-            return power;
+            //string message = $"{room.Item.Name} added. Health decreased to: {player.Health}";
         }
+
     }
 }

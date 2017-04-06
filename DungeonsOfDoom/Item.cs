@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace DungeonsOfDoom
 {
-    abstract class Item : GameObject
+    abstract class Item : GameObject, IBackpackable
     {
         public int Weight { get; }
 
@@ -14,5 +14,7 @@ namespace DungeonsOfDoom
         {
             Weight = weight;
         }        
+
+        public abstract string PickUpItem(Player player, Room room);
     }
 }

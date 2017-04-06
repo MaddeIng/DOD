@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Utils;
 
 namespace DungeonsOfDoom
 {
@@ -19,8 +20,24 @@ namespace DungeonsOfDoom
             CreatePlayer();
             CreateWorld();
 
-            //TextUtils.AnimateText("Welcome to the Dungeons of Doom...", 70);
-            //Thread.Sleep(1000);
+            TextUtils.AnimateText(@"
+     ______            _        _______  _______  _______  _        _______ 
+    (  __  \ |\     /|( (    /|(  ____ \(  ____ \(  ___  )( (    /|(  ____ \
+    | (  \  )| )   ( ||  \  ( || (    \/| (    \/| (   ) ||  \  ( || (    \/
+    | |   ) || |   | ||   \ | || |      | (__    | |   | ||   \ | || (_____ 
+    | |   | || |   | || (\ \) || | ____ |  __)   | |   | || (\ \) |(_____  )
+    | |   ) || |   | || | \   || | \_  )| (      | |   | || | \   |      ) |
+    | (__/  )| (___) || )  \  || (___) || (____/\| (___) || )  \  |/\____) |
+    (______/ (_______)|/    )_)(_______)(_______/(_______)|/    )_)\_______)
+                                                                            
+             _______  _______    ______   _______  _______  __   __ 
+            (  ___  )(  ____ \  (  __  \ (  ___  )(  ___  )(  \ /  )
+            | (   ) || (    \/  | (  \  )| (   ) || (   ) || () () |
+            | |   | || (__      | |   ) || |   | || |   | || || || |
+            | |   | ||  __)     | |   | || |   | || |   | || |(_)| |
+            | |   | || (        | |   ) || |   | || |   | || |   | |
+            | (___) || )        | (__/  )| (___) || (___) || )   ( |
+            (_______)|/         (______/ (_______)(_______)|/     \|", 1); Thread.Sleep(1000);
 
             do
             {
@@ -42,59 +59,52 @@ namespace DungeonsOfDoom
 
             if (room.Monster != null)
             {
-                message = ($"You met a/an: {room.Monster.Name} Health: {room.Monster.Health}");
-                Console.WriteLine($"Game info: {message}");
                 Console.Beep();
-                Console.BackgroundColor = ConsoleColor.DarkRed;
+                TextUtils.AnimateText($"Monster spotted: {room.Monster.Name} Health: {room.Monster.Health} Attack: {room.Monster.Attack}", 20);
+                Console.WriteLine();
 
-                BattleMonster(room);
-                //Console.ResetColor();
+                Battle(room);
             }
         }
 
-        private void BattleMonster(Room room)
+        private void Battle(Room room)
         {
-            do
+            while (player.Health > 0 && room.Monster.Health > 0)
             {
-                int damage = room.Monster.Fight(player);
+                int firstToFight = RandomUtils.Randomizer(1, 3);
 
-                if (room.Monster.Health <= 0)
+                switch (firstToFight)
                 {
-                    if (room.Monster.Name == "Ogre")
-                    {
-                        Console.WriteLine($"{room.Monster.Name} died!");
-                    }
-                    else
-                    {
-                        Console.WriteLine($"{room.Monster.Name} died out of fear!");
-                    }
+                    case 1:
+                        int damage = room.Monster.Fight(player);
+                        if (room.Monster.Health > 0)
+                        {
+                            Console.WriteLine($"{player.Name} took {damage} damage");
+                            Console.WriteLine($"{room.Monster.Name}: {room.Monster.Health} {player.Name}: {player.Health}");
+                            Thread.Sleep(1000);
+                        }
+                        else
+                        {
+                            Console.WriteLine($"{room.Monster.Name} died out of fear!");
+                            Thread.Sleep(1000);
+                        }
+                        break;
 
-                    room.Monster.Health = 0;
-                    Thread.Sleep(1000);
-                }
-                else
-                {
-                    Console.WriteLine($"You took {damage} damage");
-                    Thread.Sleep(1000);
-                }
-
-                if (player.Health > 0 && room.Monster.Health != 0)
-                {
-                    int playerDamage = player.Fight(room.Monster);
-                    Console.WriteLine($"You gave {playerDamage} damage");
-                    Thread.Sleep(1000);
-                }
-                else
-                {
-                    if (player.Health <= 0)
-                    {
-                        player.Health = 0;
+                    case 2:
+                        int playerDamage = player.Fight(room.Monster);
+                        Console.WriteLine($"{room.Monster.Name} took {playerDamage} damage");
+                        Console.WriteLine($"{room.Monster.Name}: {room.Monster.Health} {player.Name}: {player.Health}");
                         Thread.Sleep(1000);
-                    }
+                        break;
                 }
-            } while (room.Monster.Health != 0 && player.Health != 0);
+            }
 
-            room.Monster = null;
+            if (room.Monster.Health <= 0)
+            {
+                player.Backpack.Add(room.Monster);
+                room.Monster = null;
+                Monster.numberOfMonster--;
+            }
         }
 
         private void DisplayBackpack()
@@ -110,25 +120,22 @@ namespace DungeonsOfDoom
 
         private void CheckForItem()
         {
-            if (world[player.X, player.Y].Item != null)
+            Room room = world[player.X, player.Y];
+
+            if (room.Item != null)
             {
-                player.Backpack.Add(world[player.X, player.Y].Item);
-                world[player.X, player.Y].Item = null;
+                string itemMessage = room.Item.PickUpItem(player, room);
+                TextUtils.AnimateText(itemMessage, 20);
+                Thread.Sleep(1000);
             }
         }
 
         private void DisplayStats()
         {
-            Console.WriteLine($"Health: {player.Health}");
-
-            //Console.WriteLine($"Game info: {message}");
+            Console.WriteLine($"Player health: {player.Health} Player attack: {player.Attack}");
+            Console.WriteLine($"Monsters: {Monster.numberOfMonster}");
+            Console.WriteLine($"Game info: {message}");
             message = "";
-
-            //if (message != null)
-            //{
-            //    Console.WriteLine(message);
-            //    message = null;
-            //}
         }
 
         private void AskForMovement()
@@ -214,11 +221,11 @@ namespace DungeonsOfDoom
                         {
                             if (RandomUtils.Randomizer(1, 3) == 1)
                             {
-                                world[x, y].Monster = new Ogre("Ogre", "O", 30, 3);
+                                world[x, y].Monster = new Ogre("Ogre", "O", 30, 10);
                             }
                             else
                             {
-                                world[x, y].Monster = new Orc("Orc", "0", 12, 3);
+                                world[x, y].Monster = new Orc("Orc", "0", 12, 10);
                             }
                         }
 
@@ -230,7 +237,7 @@ namespace DungeonsOfDoom
                             }
                             else
                             {
-                                world[x, y].Item = new Food("Mushroom", "M", 0, 4);
+                                world[x, y].Item = new Food("Mushroom", "M", 0, 5);
                             }
                         }
                     }
@@ -240,7 +247,7 @@ namespace DungeonsOfDoom
 
         private void CreatePlayer()
         {
-            player = new Player("Player", "P", 10, 10, 0, 0);
+            player = new Player("Player", "P", 50, 10, 0, 0);
         }
     }
 }
