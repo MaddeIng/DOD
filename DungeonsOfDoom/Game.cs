@@ -19,8 +19,8 @@ namespace DungeonsOfDoom
             CreatePlayer();
             CreateWorld();
 
-            TextUtils.AnimateText("Welcome to the Dungeons of Doom...", 70);
-            Thread.Sleep(1000);
+            //TextUtils.AnimateText("Welcome to the Dungeons of Doom...", 70);
+            //Thread.Sleep(1000);
 
             do
             {
@@ -42,11 +42,13 @@ namespace DungeonsOfDoom
 
             if (room.Monster != null)
             {
-                message = ($"You met a/an: {room.Monster.Name} Health: {room.Monster.Health} Attack: {room.Monster.Attack}");
-                Console.BackgroundColor = ConsoleColor.DarkRed;
+                message = ($"You met a/an: {room.Monster.Name} Health: {room.Monster.Health}");
+                Console.WriteLine($"Game info: {message}");
                 Console.Beep();
+                Console.BackgroundColor = ConsoleColor.DarkRed;
 
                 BattleMonster(room);
+                //Console.ResetColor();
             }
         }
 
@@ -58,19 +60,22 @@ namespace DungeonsOfDoom
 
                 if (room.Monster.Health <= 0)
                 {
-                    Console.WriteLine($"{room.Monster.Name} died out of fear!");
+                    if (room.Monster.Name == "Ogre")
+                    {
+                        Console.WriteLine($"{room.Monster.Name} died!");
+                    }
+                    else
+                    {
+                        Console.WriteLine($"{room.Monster.Name} died out of fear!");
+                    }
+
                     room.Monster.Health = 0;
-                    //room.Monster = null;
                     Thread.Sleep(1000);
                 }
                 else
                 {
                     Console.WriteLine($"You took {damage} damage");
                     Thread.Sleep(1000);
-                    if (player.Health <= 0)
-                    {
-                        GameOver();
-                    }
                 }
 
                 if (player.Health > 0 && room.Monster.Health != 0)
@@ -79,7 +84,15 @@ namespace DungeonsOfDoom
                     Console.WriteLine($"You gave {playerDamage} damage");
                     Thread.Sleep(1000);
                 }
-            } while (room.Monster.Health != 0);
+                else
+                {
+                    if (player.Health <= 0)
+                    {
+                        player.Health = 0;
+                        Thread.Sleep(1000);
+                    }
+                }
+            } while (room.Monster.Health != 0 && player.Health != 0);
 
             room.Monster = null;
         }
@@ -108,7 +121,7 @@ namespace DungeonsOfDoom
         {
             Console.WriteLine($"Health: {player.Health}");
 
-            Console.WriteLine($"Game info: {message}");
+            //Console.WriteLine($"Game info: {message}");
             message = "";
 
             //if (message != null)
@@ -209,8 +222,17 @@ namespace DungeonsOfDoom
                             }
                         }
 
-                        if (random.Next(0, 100) < 10)
-                            world[x, y].Item = new Weapon("Sword", "S", 2, 3);
+                        if (RandomUtils.Percentage(10))
+                        {
+                            if (RandomUtils.Randomizer(1, 3) == 1)
+                            {
+                                world[x, y].Item = new Weapon("Sword", "S", 2, 3);
+                            }
+                            else
+                            {
+                                world[x, y].Item = new Food("Mushroom", "M", 0, 4);
+                            }
+                        }
                     }
                 }
             }
@@ -218,7 +240,7 @@ namespace DungeonsOfDoom
 
         private void CreatePlayer()
         {
-            player = new Player("Player", "P", 30, 5, 0, 0);
+            player = new Player("Player", "P", 10, 10, 0, 0);
         }
     }
 }

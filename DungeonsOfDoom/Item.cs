@@ -13,6 +13,6 @@ namespace DungeonsOfDoom
         public Item(string name, string icon, int weight) : base (name, icon)
         {
             Weight = weight;
-        }
+        }        
     }
 }

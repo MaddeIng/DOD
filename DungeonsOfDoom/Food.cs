@@ -14,5 +14,13 @@ namespace DungeonsOfDoom
         {
             ChangeHealth = changeHealth;
         }
+
+        public virtual int pickUpItem(Food storeItem)
+        {
+            int power = RandomUtils.Randomizer(3, this.ChangeHealth + 1);
+            storeItem.ChangeHealth += power;
+
+            return power;
+        }
     }
 }
